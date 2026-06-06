@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RP Hub 管理后台</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen">
+    <div id="app" class="min-h-screen flex flex-col">
+        
+        <!-- Setup Screen (First Time) -->
+        <div id="setupScreen" class="hidden flex-1 flex items-center justify-center p-4">
+            <div class="bg-gray-800/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8 w-full max-w-md border border-gray-700">
+                <div class="text-center mb-8">
+                    <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center">
+                        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM9 16H5a2 2 0 00-2 2v2a2 2 0 002 2h14a2 2 0 002-2v-2a2 2 0 00-2-2h-4l-2 2z"></path>
+                        </svg>
+                    </div>
+                    <h1 class="text-2xl font-bold text-white mb-2">首次设置</h1>
+                    <p class="text-gray-400 text-sm">创建管理员账户以保护管理后台</p>
+                </div>
+                
+                <form id="setupForm" class="space-y-4" onsubmit="event.preventDefault(); AdminApp.handleSetup();">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">用户名</label>
+                        <input type="text" id="setupUsername" 
+                            class="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                            placeholder="设置管理员用户名" autocomplete="username">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">密码</label>
+                        <input type="password" id="setupPassword"
+                            class="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                            placeholder="设置密码 (至少4位)" autocomplete="new-password">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">确认密码</label>
+                        <input type="password" id="setupConfirmPassword"
+                            class="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                            placeholder="再次输入密码" autocomplete="new-password">
+                    </div>
+                    <button type="submit" 
+                        class="w-full py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]">
+                        创建账户
+                    </button>
+                </form>
+                
+                <div id="setupError" class="hidden mt-4 p-3 bg-red-500/20 border border-red-500/50 rounded-xl text-red-400 text-sm text-center"></div>
+            </div>
+        </div>
+
+        <!-- Login Screen -->
+        <div id="loginScreen" class="flex-1 flex items-center justify-center p-4">
+            <div class="bg-gray-800/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8 w-full max-w-md border border-gray-700">
+                <div class="text-center mb-8">
+                    <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center">
+                        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                    </div>
+                    <h1 class="text-2xl font-bold text-white mb-2">RP Hub 管理后台</h1>
+                    <p class="text-gray-400 text-sm">请登录以继续</p>
+                </div>
+                
+                <form id="loginForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">用户名</label>
+                        <input type="text" id="loginUsername" 
+                            class="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                            placeholder="请输入用户名" autocomplete="username">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">密码</label>
+                        <input type="password" id="loginPassword"
+                            class="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                            placeholder="请输入密码" autocomplete="current-password">
+                    </div>
+                    <button type="submit" 
+                        class="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]">
+                        登录
+                    </button>
+                </form>
+                
+                <div id="loginError" class="hidden mt-4 p-3 bg-red-500/20 border border-red-500/50 rounded-xl text-red-400 text-sm text-center"></div>
+            </div>
+        </div>
+        
+        <!-- Main Dashboard -->
+        <div id="dashboard" class="hidden flex-1 flex flex-col">
+            <!-- Header -->
+            <header class="bg-gray-800/80 backdrop-blur-xl border-b border-gray-700 sticky top-0 z-50">
+                <div class="max-w-7xl mx-auto px-4 py-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h1 class="text-xl font-bold text-white">RP Hub 管理后台</h1>
+                                <p class="text-sm text-gray-400">存档同步 & API 管理</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div id="syncStatus" class="flex items-center gap-2 px-3 py-1.5 bg-gray-700/50 rounded-lg">
+                                <div id="syncIndicator" class="w-2 h-2 rounded-full bg-yellow-500"></div>
+                                <span id="syncStatusText" class="text-sm text-gray-300">同步中...</span>
+                            </div>
+                            <a href="https://mrkang168.github.io/rp-hub/" target="_blank" rel="noopener"
+                                class="px-3 py-2 bg-emerald-600/80 hover:bg-emerald-600 text-white rounded-lg transition flex items-center gap-2 text-sm"
+                                title="在新标签页打开 RP Hub 主站">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 015.656 0l1.415 1.415a4 4 0 010 5.656l-3 3a4 4 0 01-5.656 0M10.172 13.828a4 4 0 01-5.656 0l-1.415-1.415a4 4 0 010-5.656l3-3a4 4 0 015.656 0"></path>
+                                </svg>
+                                打开主站
+                            </a>
+                            <button id="logoutBtn" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                </svg>
+                                退出
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Content -->
+            <main class="flex-1 max-w-7xl mx-auto w-full px-4 py-6">
+                <!-- Token Setup Alert -->
+                <div id="tokenAlert" class="hidden mb-6 p-4 bg-yellow-500/20 border border-yellow-500/50 rounded-xl">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-6 h-6 text-yellow-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                        <div>
+                            <h3 class="font-semibold text-yellow-400">GitHub Token 未设置</h3>
+                            <p class="text-sm text-yellow-300/80 mt-1">请先在设置中配置 GitHub Personal Access Token 才能使用云端同步功能。</p>
+                            <button onclick="showTab('settings')" class="mt-2 px-4 py-1.5 bg-yellow-500/30 hover:bg-yellow-500/50 text-yellow-300 rounded-lg text-sm transition">
+                                前往设置
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- New Backup Alert -->
+                <div id="newBackupAlert" class="hidden mb-6 p-4 bg-green-500/20 border border-green-500/50 rounded-xl">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                        </svg>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-green-400">发现新备份</h3>
+                            <p class="text-sm text-green-300/80 mt-1">云端有更新的备份，是否恢复到本地？</p>
+                            <p id="backupInfo" class="text-xs text-green-400/60 mt-1"></p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="restoreFromCloud()" class="px-4 py-1.5 bg-green-500/30 hover:bg-green-500/50 text-green-300 rounded-lg text-sm transition">
+                                恢复
+                            </button>
+                            <button onclick="dismissBackupAlert()" class="px-4 py-1.5 bg-gray-500/30 hover:bg-gray-500/50 text-gray-300 rounded-lg text-sm transition">
+                                忽略
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tabs -->
+                <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+                    <button onclick="showTab('dashboard')" data-tab="dashboard" class="tab-btn active px-4 py-2 rounded-lg transition whitespace-nowrap">
+                        仪表盘
+                    </button>
+                    <button onclick="showTab('archive')" data-tab="archive" class="tab-btn px-4 py-2 rounded-lg transition whitespace-nowrap">
+                        存档管理
+                    </button>
+                    <button onclick="showTab('api')" data-tab="api" class="tab-btn px-4 py-2 rounded-lg transition whitespace-nowrap">
+                        API 配置
+                    </button>
+                    <button onclick="showTab('settings')" data-tab="settings" class="tab-btn px-4 py-2 rounded-lg transition whitespace-nowrap">
+                        设置
+                    </button>
+                </div>
+                
+                <!-- Tab Content -->
+                <div id="tabContent">
+                    <!-- Dashboard Tab -->
+                    <div id="tab-dashboard" class="tab-content">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                            <div class="bg-gray-800/60 backdrop-blur rounded-xl p-6 border border-gray-700">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <h3 class="text-2xl font-bold text-white mb-1" id="localBackupCount">-</h3>
+                                <p class="text-gray-400 text-sm">本地存档数量</p>
+                            </div>
+                            <div class="bg-gray-800/60 backdrop-blur rounded-xl p-6 border border-gray-700">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <h3 class="text-2xl font-bold text-white mb-1" id="cloudBackupCount">-</h3>
+                                <p class="text-gray-400 text-sm">云端存档数量</p>
+                            </div>
+                            <div class="bg-gray-800/60 backdrop-blur rounded-xl p-6 border border-gray-700">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <h3 class="text-2xl font-bold text-white mb-1" id="apiConfigCount">-</h3>
+                                <p class="text-gray-400 text-sm">API 配置数量</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Quick Actions -->
+                        <div class="bg-gray-800/60 backdrop-blur rounded-xl p-6 border border-gray-700">
+                            <h3 class="text-lg font-semibold text-white mb-4">快速操作</h3>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <button onclick="manualBackup()" class="flex flex-col items-center gap-2 p-4 bg-gray-700/50 hover:bg-gray-700 rounded-xl transition">
+                                    <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                                    </svg>
+                                    <span class="text-sm text-gray-300">上传到云端</span>
+                                </button>
+                                <button onclick="manualRestore()" class="flex flex-col items-center gap-2 p-4 bg-gray-700/50 hover:bg-gray-700 rounded-xl transition">
+                                    <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                                    </svg>
+                                    <span class="text-sm text-gray-300">从本地上传</span>
+                                </button>
+                                <button onclick="downloadBackup()" class="flex flex-col items-center gap-2 p-4 bg-gray-700/50 hover:bg-gray-700 rounded-xl transition">
+                                    <svg class="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    </svg>
+                                    <span class="text-sm text-gray-300">下载到本地</span>
+                                </button>
+                                <button onclick="clearLocalData()" class="flex flex-col items-center gap-2 p-4 bg-gray-700/50 hover:bg-gray-700 rounded-xl transition">
+                                    <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                    <span class="text-sm text-gray-300">清空本地数据</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Archive Tab -->
+                    <div id="tab-archive" class="tab-content hidden">
+                        <div class="bg-gray-800/60 backdrop-blur rounded-xl border border-gray-700 overflow-hidden">
+                            <div class="p-4 border-b border-gray-700 flex items-center justify-between">
+                                <h3 class="text-lg font-semibold text-white">本地存档</h3>
+                                <div class="flex gap-2">
+                                    <button onclick="refreshCloudBackupList()" class="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm transition flex items-center gap-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                        </svg>
+                                        刷新
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="localBackupList" class="divide-y divide-gray-700">
+                                <div class="p-8 text-center text-gray-500">加载中...</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 bg-gray-800/60 backdrop-blur rounded-xl border border-gray-700 overflow-hidden">
+                            <div class="p-4 border-b border-gray-700">
+                                <h3 class="text-lg font-semibold text-white">云端存档</h3>
+                            </div>
+                            <div id="cloudBackupList" class="divide-y divide-gray-700">
+                                <div class="p-8 text-center text-gray-500">加载中...</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- API Config Tab -->
+                    <div id="tab-api" class="tab-content hidden">
+                        <div class="bg-gray-800/60 backdrop-blur rounded-xl border border-gray-700 overflow-hidden">
+                            <div class="p-4 border-b border-gray-700 flex items-center justify-between">
+                                <h3 class="text-lg font-semibold text-white">API 配置列表</h3>
+                                <div class="flex gap-2">
+                                    <button onclick="loadApiConfigs()" class="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm transition flex items-center gap-1" title="从 localStorage 重新读取并渲染列表">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                        </svg>
+                                        刷新
+                                    </button>
+                                    <button onclick="showAddApiModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                        </svg>
+                                        添加配置
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="apiConfigList" class="divide-y divide-gray-700">
+                                <div class="p-8 text-center text-gray-500">加载中...</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Settings Tab -->
+                    <div id="tab-settings" class="tab-content hidden">
+                        <div class="space-y-6">
+                            <!-- GitHub Token -->
+                            <div class="bg-gray-800/60 backdrop-blur rounded-xl border border-gray-700 p-6">
+                                <h3 class="text-lg font-semibold text-white mb-4">GitHub 设置</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-300 mb-2">仓库信息</label>
+                                        <div class="flex gap-4">
+                                            <input type="text" id="githubOwner" placeholder="仓库所有者 (如: Mrkang168)"
+                                                class="flex-1 px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <input type="text" id="githubRepo" placeholder="仓库名 (如: rp-hub)"
+                                                class="flex-1 px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-300 mb-2">Personal Access Token</label>
+                                        <div class="flex gap-2">
+                                            <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+                                                class="flex-1 px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <button onclick="saveToken()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition">
+                                                保存
+                                            </button>
+                                        </div>
+                                        <p class="mt-2 text-xs text-gray-500">Token 需要 repo 权限来访问和修改仓库文件</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Auto Sync Settings -->
+                            <div class="bg-gray-800/60 backdrop-blur rounded-xl border border-gray-700 p-6">
+                                <h3 class="text-lg font-semibold text-white mb-4">自动同步设置</h3>
+                                <div class="space-y-4">
+                                    <label class="flex items-center gap-3 cursor-pointer">
+                                        <input type="checkbox" id="autoSyncEnabled" class="w-5 h-5 rounded bg-gray-700 border-gray-600 text-blue-600 focus:ring-blue-500">
+                                        <span class="text-gray-300">启用自动同步</span>
+                                    </label>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-300 mb-2">同步频率</label>
+                                        <select id="syncFrequency" class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <option value="realtime">实时同步（每次变更后）</option>
+                                            <option value="5min">每 5 分钟</option>
+                                            <option value="15min">每 15 分钟</option>
+                                            <option value="30min">每 30 分钟</option>
+                                            <option value="hourly">每小时</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Encryption -->
+                            <div class="bg-gray-800/60 backdrop-blur rounded-xl border border-gray-700 p-6">
+                                <h3 class="text-lg font-semibold text-white mb-4">加密设置</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-300 mb-2">加密密钥</label>
+                                        <input type="password" id="encryptionKey" placeholder="用于加密敏感数据的密钥"
+                                            class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <p class="mt-2 text-xs text-gray-500">此密钥用于加密存储在 GitHub 的敏感信息（如 API Key）</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Danger Zone -->
+                            <div class="bg-gray-800/60 backdrop-blur rounded-xl border border-red-900/50 p-6">
+                                <h3 class="text-lg font-semibold text-red-400 mb-4">危险区域</h3>
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between p-4 bg-red-500/10 rounded-lg">
+                                        <div>
+                                            <p class="text-white font-medium">清除所有本地数据</p>
+                                            <p class="text-sm text-gray-400">删除浏览器中的所有本地存储数据</p>
+                                        </div>
+                                        <button onclick="confirmClearLocalData()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition">
+                                            清除
+                                        </button>
+                                    </div>
+                                    <div class="flex items-center justify-between p-4 bg-red-500/10 rounded-lg">
+                                        <div>
+                                            <p class="text-white font-medium">重置所有设置</p>
+                                            <p class="text-sm text-gray-400">将所有配置恢复为默认值</p>
+                                        </div>
+                                        <button onclick="confirmResetSettings()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition">
+                                            重置
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Modal -->
+    <div id="modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md border border-gray-700 max-h-[90vh] overflow-y-auto">
+                <div class="p-6 border-b border-gray-700 flex items-center justify-between">
+                    <h3 id="modalTitle" class="text-lg font-semibold text-white">提示</h3>
+                    <button onclick="closeModal()" class="p-1 hover:bg-gray-700 rounded-lg transition">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div id="modalContent" class="p-6">
+                    <!-- Dynamic content -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-4 right-4 z-50 transform translate-y-full opacity-0 transition-all duration-300">
+        <div class="px-6 py-3 bg-gray-800 text-white rounded-xl shadow-2xl border border-gray-700 flex items-center gap-3">
+            <svg id="toastIcon" class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span id="toastMessage">操作成功</span>
+        </div>
+    </div>
+    
+    <!-- Add API Modal -->
+    <div id="apiModal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeApiModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-700">
+                <div class="p-6 border-b border-gray-700 flex items-center justify-between">
+                    <h3 id="apiModalTitle" class="text-lg font-semibold text-white">添加 API 配置</h3>
+                    <button onclick="closeApiModal()" class="p-1 hover:bg-gray-700 rounded-lg transition">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">配置名称</label>
+                        <input type="text" id="apiName" placeholder="我的 API"
+                            class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">API URL</label>
+                        <input type="text" id="apiUrl" placeholder="https://api.example.com/v1"
+                            class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">API Key</label>
+                        <input type="password" id="apiKey" placeholder="sk-xxxxxxxxxxxxxxxxxxxx"
+                            class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">默认模型</label>
+                        <input type="text" id="apiModel" placeholder="gpt-4"
+                            class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                <div class="p-6 border-t border-gray-700 flex gap-3 justify-end">
+                    <button onclick="closeApiModal()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition">
+                        取消
+                    </button>
+                    <button onclick="saveApiConfig()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition">
+                        保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.2.0/crypto-js.min.js"></script>
+    <script src="admin.js"></script>
+    <script src="archive.js"></script>
+</body>
+</html>

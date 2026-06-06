@@ -1,0 +1,36 @@
+RP Hub 管理后台 - 书签入口
+================================
+
+使用方法：
+1. 将下方的链接拖拽到浏览器书签栏
+2. 或者右键保存为书签
+
+书签链接 (拖拽到书签栏):
+<a href="javascript:(function(){if(confirm('打开 RP Hub 管理后台?')){window.open('admin.html','_blank','width=1200,height=800');}})();">⚙️ RP Hub 管理</a>
+
+直接访问:
+https://mrkang168.github.io/rp-hub/admin.html
+
+================================
+功能说明：
+
+1. 登录
+   - 用户名: kang
+   - 密码: kang
+
+2. 首次使用设置
+   - 点击"设置"标签
+   - 填入 GitHub Owner 和 Repo 名称
+   - 填入 Personal Access Token
+   - 设置加密密钥（用于加密敏感数据）
+
+3. 存档功能
+   - 手动备份到本地文件
+   - 从本地文件恢复
+   - 上传到云端 GitHub
+   - 从云端恢复
+   - 自动同步（开启后自动保存）
+
+4. API 配置管理
+   - 添加/编辑/删除 API 配置
+   - API Key 自动加密存储
