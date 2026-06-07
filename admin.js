@@ -1586,6 +1586,7 @@ window.showAddApiModal = () => AdminApp.showAddApiModal();
 window.closeApiModal = () => AdminApp.closeApiModal();
 window.saveApiConfig = () => AdminApp.saveApiConfig();
 window.refreshCloudBackupList = () => AdminApp.refreshCloudBackupList();
+window.switchApiType = (type) => AdminApp.switchApiType(type);
 
 // Expose for console debugging and tests
 window.AdminApp = AdminApp;
