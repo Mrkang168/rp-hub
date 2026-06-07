@@ -538,23 +538,68 @@
                         <div class="space-y-3">
                             <div>
                                 <label class="block text-sm font-medium text-gray-300 mb-2">预设模型①</label>
-                                <input type="text" id="apiModel1" placeholder="gemini-3.1-pro-preview-high"
-                                    class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <select id="apiModel1" class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">-- 选择模型 --</option>
+                                    <option value="gemini-3.1-pro-preview-high">Gemini 3.1 Pro</option>
+                                    <option value="gemini-2.5-pro-preview-05-06">Gemini 2.5 Pro</option>
+                                    <option value="gemini-2.5-flash-preview-05-20">Gemini 2.5 Flash</option>
+                                    <option value="deepseek-r1-0528">DeepSeek R1</option>
+                                    <option value="deepseek-chat">DeepSeek V3</option>
+                                    <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
+                                    <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku</option>
+                                    <option value="gpt-4o">GPT-4o</option>
+                                    <option value="gpt-4o-mini">GPT-4o Mini</option>
+                                    <option value="qwen3-235b-a22b">Qwen3 235B</option>
+                                    <option value="qwen3-32b">Qwen3 32B</option>
+                                </select>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-300 mb-2">预设模型②</label>
-                                <input type="text" id="apiModel2" placeholder="gemini-2.5-flash-preview-05-20"
-                                    class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <select id="apiModel2" class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">-- 选择模型 --</option>
+                                    <option value="gemini-3.1-pro-preview-high">Gemini 3.1 Pro</option>
+                                    <option value="gemini-2.5-pro-preview-05-06">Gemini 2.5 Pro</option>
+                                    <option value="gemini-2.5-flash-preview-05-20">Gemini 2.5 Flash</option>
+                                    <option value="deepseek-r1-0528">DeepSeek R1</option>
+                                    <option value="deepseek-chat">DeepSeek V3</option>
+                                    <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
+                                    <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku</option>
+                                    <option value="gpt-4o">GPT-4o</option>
+                                    <option value="gpt-4o-mini">GPT-4o Mini</option>
+                                    <option value="qwen3-235b-a22b">Qwen3 235B</option>
+                                    <option value="qwen3-32b">Qwen3 32B</option>
+                                </select>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-300 mb-2">预设模型③</label>
-                                <input type="text" id="apiModel3" placeholder="deepseek-r1-0528"
-                                    class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <select id="apiModel3" class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">-- 选择模型 --</option>
+                                    <option value="gemini-3.1-pro-preview-high">Gemini 3.1 Pro</option>
+                                    <option value="gemini-2.5-pro-preview-05-06">Gemini 2.5 Pro</option>
+                                    <option value="gemini-2.5-flash-preview-05-20">Gemini 2.5 Flash</option>
+                                    <option value="deepseek-r1-0528">DeepSeek R1</option>
+                                    <option value="deepseek-chat">DeepSeek V3</option>
+                                    <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
+                                    <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku</option>
+                                    <option value="gpt-4o">GPT-4o</option>
+                                    <option value="gpt-4o-mini">GPT-4o Mini</option>
+                                    <option value="qwen3-235b-a22b">Qwen3 235B</option>
+                                    <option value="qwen3-32b">Qwen3 32B</option>
+                                </select>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-300 mb-2">建议回复模型</label>
-                                <input type="text" id="apiModelSuggest" placeholder="gemini-2.5-flash-preview-05-20"
-                                    class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <select id="apiModelSuggest" class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">-- 选择模型 --</option>
+                                    <option value="gemini-2.5-flash-preview-05-20">Gemini 2.5 Flash</option>
+                                    <option value="gemini-3.1-pro-preview-high">Gemini 3.1 Pro</option>
+                                    <option value="gemini-2.5-pro-preview-05-06">Gemini 2.5 Pro</option>
+                                    <option value="deepseek-chat">DeepSeek V3</option>
+                                    <option value="deepseek-r1-0528">DeepSeek R1</option>
+                                    <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku</option>
+                                    <option value="gpt-4o-mini">GPT-4o Mini</option>
+                                    <option value="qwen3-32b">Qwen3 32B</option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -564,31 +609,46 @@
                         <div class="space-y-3">
                             <div>
                                 <label class="block text-sm font-medium text-gray-300 mb-2">生图模型</label>
-                                <input type="text" id="apiImageModel" placeholder="nai-diffusion-4-5-full"
-                                    class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <select id="apiImageModel" class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="nai-diffusion-4-5-full">NAI Diffusion 4.5 Full</option>
+                                    <option value="nai-diffusion-4-5-curated">NAI Diffusion 4.5 Curated</option>
+                                    <option value="nai-diffusion-3">NAI Diffusion 3</option>
+                                    <option value="nai-diffusion-furry-3">NAI Diffusion Furry 3</option>
+                                    <option value="nai-diffusion-2">NAI Diffusion 2</option>
+                                </select>
                             </div>
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-300 mb-2">采样步数</label>
-                                    <input type="number" id="apiImageSteps" placeholder="40" min="1" max="100"
+                                    <input type="number" id="apiImageSteps" placeholder="40" min="1" max="100" value="40"
                                         class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-300 mb-2">CFG Scale</label>
-                                    <input type="number" id="apiImageScale" placeholder="6" min="1" max="30" step="0.5"
+                                    <input type="number" id="apiImageScale" placeholder="6" min="1" max="30" step="0.5" value="6"
                                         class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 </div>
                             </div>
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-300 mb-2">采样器</label>
-                                    <input type="text" id="apiImageSampler" placeholder="k_dpmpp_2m_sde"
-                                        class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <select id="apiImageSampler" class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="k_dpmpp_2m_sde">k_dpmpp_2m_sde</option>
+                                        <option value="k_dpmpp_2m">k_dpmpp_2m</option>
+                                        <option value="k_dpmpp_sde">k_dpmpp_sde</option>
+                                        <option value="k_euler_ancestral">k_euler_ancestral</option>
+                                        <option value="k_euler">k_euler</option>
+                                        <option value="ddim">ddim</option>
+                                    </select>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-300 mb-2">噪声调度</label>
-                                    <input type="text" id="apiImageNoiseSchedule" placeholder="karras"
-                                        class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <select id="apiImageNoiseSchedule" class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="karras">karras</option>
+                                        <option value="native">native</option>
+                                        <option value="exponential">exponential</option>
+                                        <option value="polylinear">polylinear</option>
+                                    </select>
                                 </div>
                             </div>
                             <div>
