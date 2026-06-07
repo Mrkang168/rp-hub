@@ -813,58 +813,62 @@ const AdminApp = {
     
     // Save API config
     saveApiConfig() {
-        const name = document.getElementById('apiName').value.trim();
-        const apiUrl = document.getElementById('apiUrl').value.trim();
-        const apiKey = document.getElementById('apiKey').value;
-        const type = this._currentApiType;
-        
-        if (!name || !apiUrl) {
-            this.showToast('请填写名称和 API URL', 'error');
-            return;
-        }
-        
-        const config = {
-            name,
-            apiUrl,
-            type,
-            createdAt: this.editingApiIndex >= 0 ? this.apiConfigs[this.editingApiIndex].createdAt : Date.now(),
-            updatedAt: Date.now()
-        };
-        
-        if (apiKey) {
-            config.apiKey = this.encrypt(apiKey);
-        }
+        try {
+            const name = document.getElementById('apiName').value.trim();
+            const apiUrl = document.getElementById('apiUrl').value.trim();
+            const apiKey = document.getElementById('apiKey').value;
+            const type = this._currentApiType;
+            
+            if (!name || !apiUrl) {
+                this.showToast('请填写名称和 API URL', 'error');
+                return;
+            }
+            
+            const config = {
+                name,
+                apiUrl,
+                type,
+                createdAt: this.editingApiIndex >= 0 ? this.apiConfigs[this.editingApiIndex].createdAt : Date.now(),
+                updatedAt: Date.now()
+            };
+            
+            if (apiKey) {
+                config.apiKey = this.encrypt(apiKey);
+            }
 
-        if (type === 'text') {
-            config.model1 = document.getElementById('apiModel1').value.trim();
-            config.model2 = document.getElementById('apiModel2').value.trim();
-            config.model3 = document.getElementById('apiModel3').value.trim();
-            config.modelSuggest = document.getElementById('apiModelSuggest').value.trim();
-        } else {
-            config.imageModel = document.getElementById('apiImageModel').value.trim() || 'nai-diffusion-4-5-full';
-            config.imageSteps = parseInt(document.getElementById('apiImageSteps').value) || 40;
-            config.imageScale = parseFloat(document.getElementById('apiImageScale').value) || 6;
-            config.imageSampler = document.getElementById('apiImageSampler').value.trim() || 'k_dpmpp_2m_sde';
-            config.imageNoiseSchedule = document.getElementById('apiImageNoiseSchedule').value.trim() || 'karras';
-            config.imageNegative = document.getElementById('apiImageNegative').value;
-        }
-        
-        if (this.editingApiIndex >= 0) {
-            this.apiConfigs[this.editingApiIndex] = config;
-            this.showToast('API 配置已更新');
-        } else {
-            this.apiConfigs.push(config);
-            this.showToast('API 配置已添加');
-        }
-        
-        this.saveApiConfigs();
-        this.renderApiConfigList();
-        document.getElementById('apiConfigCount').textContent = this.apiConfigs.length;
-        this.closeApiModal();
-        
-        // Trigger auto-sync if enabled
-        if (this.settings.autoSyncEnabled && this.settings.githubToken) {
-            ArchiveManager.autoSync();
+            if (type === 'text') {
+                config.model1 = document.getElementById('apiModel1') ? document.getElementById('apiModel1').value.trim() : '';
+                config.model2 = document.getElementById('apiModel2') ? document.getElementById('apiModel2').value.trim() : '';
+                config.model3 = document.getElementById('apiModel3') ? document.getElementById('apiModel3').value.trim() : '';
+                config.modelSuggest = document.getElementById('apiModelSuggest') ? document.getElementById('apiModelSuggest').value.trim() : '';
+            } else {
+                config.imageModel = document.getElementById('apiImageModel') ? document.getElementById('apiImageModel').value.trim() : 'nai-diffusion-4-5-full';
+                config.imageSteps = parseInt(document.getElementById('apiImageSteps')?.value) || 40;
+                config.imageScale = parseFloat(document.getElementById('apiImageScale')?.value) || 6;
+                config.imageSampler = document.getElementById('apiImageSampler') ? document.getElementById('apiImageSampler').value.trim() : 'k_dpmpp_2m_sde';
+                config.imageNoiseSchedule = document.getElementById('apiImageNoiseSchedule') ? document.getElementById('apiImageNoiseSchedule').value.trim() : 'karras';
+                config.imageNegative = document.getElementById('apiImageNegative') ? document.getElementById('apiImageNegative').value : '';
+            }
+            
+            if (this.editingApiIndex >= 0) {
+                this.apiConfigs[this.editingApiIndex] = config;
+                this.showToast('API 配置已更新');
+            } else {
+                this.apiConfigs.push(config);
+                this.showToast('API 配置已添加');
+            }
+            
+            this.saveApiConfigs();
+            this.renderApiConfigList();
+            document.getElementById('apiConfigCount').textContent = this.apiConfigs.length;
+            this.closeApiModal();
+            
+            if (this.settings.autoSyncEnabled && this.settings.githubToken) {
+                ArchiveManager.autoSync();
+            }
+        } catch (e) {
+            console.error('saveApiConfig error:', e);
+            this.showToast('保存失败: ' + e.message, 'error');
         }
     },
     
