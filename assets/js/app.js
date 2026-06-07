@@ -181,6 +181,20 @@ createApp({
 
         const getImageGenConfig = () => {
             try {
+                const apiConfigs = JSON.parse(localStorage.getItem('rphub_api_configs') || '[]');
+                const imageConfig = apiConfigs.find(c => c.type === 'image');
+                if (imageConfig) {
+                    return {
+                        url: imageConfig.apiUrl || '',
+                        token: imageConfig._decryptedKey || imageConfig.apiKey || settings.imageGenKey || '',
+                        model: imageConfig.imageModel || 'nai-diffusion-4-5-full',
+                        steps: imageConfig.imageSteps || 40,
+                        scale: imageConfig.imageScale || 6,
+                        sampler: imageConfig.imageSampler || 'k_dpmpp_2m_sde',
+                        noiseSchedule: imageConfig.imageNoiseSchedule || 'karras',
+                        negative: imageConfig.imageNegative || ''
+                    };
+                }
                 const adminSettings = JSON.parse(localStorage.getItem('rphub_admin_settings') || '{}');
                 return {
                     url: adminSettings.imageGenApiUrl || '',

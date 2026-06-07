@@ -495,7 +495,7 @@
     <div id="apiModal" class="fixed inset-0 z-50 hidden">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeApiModal()"></div>
         <div class="absolute inset-0 flex items-center justify-center p-4">
-            <div class="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-700">
+            <div class="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-700 max-h-[90vh] overflow-y-auto">
                 <div class="p-6 border-b border-gray-700 flex items-center justify-between">
                     <h3 id="apiModalTitle" class="text-lg font-semibold text-white">添加 API 配置</h3>
                     <button onclick="closeApiModal()" class="p-1 hover:bg-gray-700 rounded-lg transition">
@@ -505,6 +505,18 @@
                     </button>
                 </div>
                 <div class="p-6 space-y-4">
+                    <!-- 配置类型选择 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">配置类型</label>
+                        <div class="flex gap-2">
+                            <button id="apiTypeText" onclick="switchApiType('text')" class="flex-1 px-4 py-2 rounded-lg text-sm font-medium transition border-2 border-blue-500 bg-blue-500/20 text-blue-400">
+                                文本模式
+                            </button>
+                            <button id="apiTypeImage" onclick="switchApiType('image')" class="flex-1 px-4 py-2 rounded-lg text-sm font-medium transition border-2 border-gray-600 bg-gray-700/50 text-gray-400">
+                                生图模式
+                            </button>
+                        </div>
+                    </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">配置名称</label>
                         <input type="text" id="apiName" placeholder="我的 API"
@@ -520,10 +532,71 @@
                         <input type="password" id="apiKey" placeholder="sk-xxxxxxxxxxxxxxxxxxxx"
                             class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">默认模型</label>
-                        <input type="text" id="apiModel" placeholder="gpt-4"
-                            class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+                    <!-- 文本模式字段 -->
+                    <div id="textModeFields">
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">预设模型①</label>
+                                <input type="text" id="apiModel1" placeholder="gemini-3.1-pro-preview-high"
+                                    class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">预设模型②</label>
+                                <input type="text" id="apiModel2" placeholder="gemini-2.5-flash-preview-05-20"
+                                    class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">预设模型③</label>
+                                <input type="text" id="apiModel3" placeholder="deepseek-r1-0528"
+                                    class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">建议回复模型</label>
+                                <input type="text" id="apiModelSuggest" placeholder="gemini-2.5-flash-preview-05-20"
+                                    class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 生图模式字段 -->
+                    <div id="imageModeFields" class="hidden">
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">生图模型</label>
+                                <input type="text" id="apiImageModel" placeholder="nai-diffusion-4-5-full"
+                                    class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">采样步数</label>
+                                    <input type="number" id="apiImageSteps" placeholder="40" min="1" max="100"
+                                        class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">CFG Scale</label>
+                                    <input type="number" id="apiImageScale" placeholder="6" min="1" max="30" step="0.5"
+                                        class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">采样器</label>
+                                    <input type="text" id="apiImageSampler" placeholder="k_dpmpp_2m_sde"
+                                        class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">噪声调度</label>
+                                    <input type="text" id="apiImageNoiseSchedule" placeholder="karras"
+                                        class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">负面提示词</label>
+                                <textarea id="apiImageNegative" rows="3" placeholder="bad anatomy, bad hands..."
+                                    class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"></textarea>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="p-6 border-t border-gray-700 flex gap-3 justify-end">

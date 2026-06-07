@@ -544,13 +544,14 @@ const AdminApp = {
                     <div class="flex items-center gap-3">
                         <h4 class="font-medium text-white">${this.escapeHtml(config.name)}</h4>
                         ${config.isDefault ? '<span class="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-xs rounded">默认</span>' : ''}
+                        <span class="px-2 py-0.5 ${config.type === 'image' ? 'bg-purple-500/20 text-purple-400' : 'bg-green-500/20 text-green-400'} text-xs rounded">${config.type === 'image' ? '生图' : '文本'}</span>
                     </div>
                     <p class="text-sm text-gray-400 mt-1">${this.escapeHtml(config.apiUrl)}</p>
                     <div class="flex items-center gap-2 mt-2">
                         <span class="text-xs text-gray-500">API Key:</span>
                         <span class="text-xs text-gray-400 font-mono">${this.getMaskedKey(config.apiKey)}</span>
                     </div>
-                    ${config.model ? `<p class="text-xs text-gray-500 mt-1">模型: ${this.escapeHtml(config.model)}</p>` : ''}
+                    ${config.type === 'text' ? (config.model1 ? `<p class="text-xs text-gray-500 mt-1">模型①: ${this.escapeHtml(config.model1)}</p>` : '') : (config.imageModel ? `<p class="text-xs text-gray-500 mt-1">生图模型: ${this.escapeHtml(config.imageModel)}</p>` : '')}
                 </div>
                 <div class="flex items-center gap-2">
                     <button onclick="AdminApp.toggleApiKeyVisibility(${index})" class="p-2 hover:bg-gray-600 rounded-lg transition" title="显示/隐藏 Key">
@@ -604,13 +605,45 @@ const AdminApp = {
         }
     },
     
+    _currentApiType: 'text',
+
+    switchApiType(type) {
+        this._currentApiType = type;
+        const textBtn = document.getElementById('apiTypeText');
+        const imageBtn = document.getElementById('apiTypeImage');
+        const textFields = document.getElementById('textModeFields');
+        const imageFields = document.getElementById('imageModeFields');
+        if (type === 'text') {
+            textBtn.className = 'flex-1 px-4 py-2 rounded-lg text-sm font-medium transition border-2 border-blue-500 bg-blue-500/20 text-blue-400';
+            imageBtn.className = 'flex-1 px-4 py-2 rounded-lg text-sm font-medium transition border-2 border-gray-600 bg-gray-700/50 text-gray-400';
+            textFields.classList.remove('hidden');
+            imageFields.classList.add('hidden');
+        } else {
+            imageBtn.className = 'flex-1 px-4 py-2 rounded-lg text-sm font-medium transition border-2 border-purple-500 bg-purple-500/20 text-purple-400';
+            textBtn.className = 'flex-1 px-4 py-2 rounded-lg text-sm font-medium transition border-2 border-gray-600 bg-gray-700/50 text-gray-400';
+            imageFields.classList.remove('hidden');
+            textFields.classList.add('hidden');
+        }
+    },
+
     // Show add API modal
     showAddApiModal() {
         document.getElementById('apiModalTitle').textContent = '添加 API 配置';
         document.getElementById('apiName').value = '';
         document.getElementById('apiUrl').value = '';
         document.getElementById('apiKey').value = '';
-        document.getElementById('apiModel').value = '';
+        document.getElementById('apiModel1').value = '';
+        document.getElementById('apiModel2').value = '';
+        document.getElementById('apiModel3').value = '';
+        document.getElementById('apiModelSuggest').value = '';
+        document.getElementById('apiImageModel').value = '';
+        document.getElementById('apiImageSteps').value = '';
+        document.getElementById('apiImageScale').value = '';
+        document.getElementById('apiImageSampler').value = '';
+        document.getElementById('apiImageNoiseSchedule').value = '';
+        document.getElementById('apiImageNegative').value = '';
+        this._currentApiType = 'text';
+        this.switchApiType('text');
         this.editingApiIndex = -1;
         document.getElementById('apiModal').classList.remove('hidden');
     },
@@ -622,7 +655,22 @@ const AdminApp = {
         document.getElementById('apiName').value = config.name;
         document.getElementById('apiUrl').value = config.apiUrl;
         document.getElementById('apiKey').value = config._decryptedKey || '';
-        document.getElementById('apiModel').value = config.model || '';
+        const type = config.type || 'text';
+        this._currentApiType = type;
+        this.switchApiType(type);
+        if (type === 'text') {
+            document.getElementById('apiModel1').value = config.model1 || '';
+            document.getElementById('apiModel2').value = config.model2 || '';
+            document.getElementById('apiModel3').value = config.model3 || '';
+            document.getElementById('apiModelSuggest').value = config.modelSuggest || '';
+        } else {
+            document.getElementById('apiImageModel').value = config.imageModel || '';
+            document.getElementById('apiImageSteps').value = config.imageSteps || '';
+            document.getElementById('apiImageScale').value = config.imageScale || '';
+            document.getElementById('apiImageSampler').value = config.imageSampler || '';
+            document.getElementById('apiImageNoiseSchedule').value = config.imageNoiseSchedule || '';
+            document.getElementById('apiImageNegative').value = config.imageNegative || '';
+        }
         this.editingApiIndex = index;
         document.getElementById('apiModal').classList.remove('hidden');
     },
@@ -638,7 +686,7 @@ const AdminApp = {
         const name = document.getElementById('apiName').value.trim();
         const apiUrl = document.getElementById('apiUrl').value.trim();
         const apiKey = document.getElementById('apiKey').value;
-        const model = document.getElementById('apiModel').value.trim();
+        const type = this._currentApiType;
         
         if (!name || !apiUrl) {
             this.showToast('请填写名称和 API URL', 'error');
@@ -648,14 +696,27 @@ const AdminApp = {
         const config = {
             name,
             apiUrl,
-            model,
+            type,
             createdAt: this.editingApiIndex >= 0 ? this.apiConfigs[this.editingApiIndex].createdAt : Date.now(),
             updatedAt: Date.now()
         };
         
-        // Encrypt API key
         if (apiKey) {
             config.apiKey = this.encrypt(apiKey);
+        }
+
+        if (type === 'text') {
+            config.model1 = document.getElementById('apiModel1').value.trim();
+            config.model2 = document.getElementById('apiModel2').value.trim();
+            config.model3 = document.getElementById('apiModel3').value.trim();
+            config.modelSuggest = document.getElementById('apiModelSuggest').value.trim();
+        } else {
+            config.imageModel = document.getElementById('apiImageModel').value.trim() || 'nai-diffusion-4-5-full';
+            config.imageSteps = parseInt(document.getElementById('apiImageSteps').value) || 40;
+            config.imageScale = parseFloat(document.getElementById('apiImageScale').value) || 6;
+            config.imageSampler = document.getElementById('apiImageSampler').value.trim() || 'k_dpmpp_2m_sde';
+            config.imageNoiseSchedule = document.getElementById('apiImageNoiseSchedule').value.trim() || 'karras';
+            config.imageNegative = document.getElementById('apiImageNegative').value;
         }
         
         if (this.editingApiIndex >= 0) {
