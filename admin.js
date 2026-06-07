@@ -78,6 +78,14 @@ const AdminApp = {
         document.getElementById('encryptionKey').value = this.settings.encryptionKey || '';
         document.getElementById('autoSyncEnabled').checked = this.settings.autoSyncEnabled;
         document.getElementById('syncFrequency').value = this.settings.syncFrequency;
+        document.getElementById('imageGenApiUrl').value = this.settings.imageGenApiUrl || '';
+        document.getElementById('imageGenApiKey').value = this.settings.imageGenApiKey || '';
+        document.getElementById('imageGenModel').value = this.settings.imageGenModel || 'nai-diffusion-4-5-full';
+        document.getElementById('imageGenSteps').value = this.settings.imageGenSteps || 40;
+        document.getElementById('imageGenScale').value = this.settings.imageGenScale || 6;
+        document.getElementById('imageGenSampler').value = this.settings.imageGenSampler || 'k_dpmpp_2m_sde';
+        document.getElementById('imageGenNoiseSchedule').value = this.settings.imageGenNoiseSchedule || 'karras';
+        document.getElementById('imageGenNegative').value = this.settings.imageGenNegative || '';
     },
     
     // Save settings to localStorage
@@ -88,6 +96,14 @@ const AdminApp = {
         this.settings.encryptionKey = document.getElementById('encryptionKey').value;
         this.settings.autoSyncEnabled = document.getElementById('autoSyncEnabled').checked;
         this.settings.syncFrequency = document.getElementById('syncFrequency').value;
+        this.settings.imageGenApiUrl = document.getElementById('imageGenApiUrl').value;
+        this.settings.imageGenApiKey = document.getElementById('imageGenApiKey').value;
+        this.settings.imageGenModel = document.getElementById('imageGenModel').value || 'nai-diffusion-4-5-full';
+        this.settings.imageGenSteps = parseInt(document.getElementById('imageGenSteps').value) || 40;
+        this.settings.imageGenScale = parseFloat(document.getElementById('imageGenScale').value) || 6;
+        this.settings.imageGenSampler = document.getElementById('imageGenSampler').value || 'k_dpmpp_2m_sde';
+        this.settings.imageGenNoiseSchedule = document.getElementById('imageGenNoiseSchedule').value || 'karras';
+        this.settings.imageGenNegative = document.getElementById('imageGenNegative').value;
 
         localStorage.setItem('rphub_admin_settings', JSON.stringify(this.settings));
         // v2.0: 保存后异步推一份加密 PAT 到公开 bootstrap 文件, 供新浏览器自动恢复

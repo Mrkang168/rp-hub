@@ -17,7 +17,37 @@ createApp({
         CustomSelect: window.RPHubCustomSelect
     },
     setup() {
-        const cardUtils = window.RPHubCardUtils;
+        const cardUtils = new Proxy({}, {
+            get(_, key) {
+                const utils = window.RPHubCardUtils;
+                if (!utils) throw new Error('角色卡工具还没加载完成，请稍后再试');
+                const value = utils[key];
+                if (typeof key === 'string' && value === undefined) {
+                    throw new Error(`角色卡工具缺少 ${key}，请刷新后重试`);
+                }
+                return value;
+            }
+        });
+        const waitForCardUtils = (timeoutMs = 8000) => new Promise((resolve, reject) => {
+            if (window.RPHubCardUtils) {
+                resolve(window.RPHubCardUtils);
+                return;
+            }
+
+            const startedAt = Date.now();
+            const timer = setInterval(() => {
+                if (window.RPHubCardUtils) {
+                    clearInterval(timer);
+                    resolve(window.RPHubCardUtils);
+                    return;
+                }
+
+                if (Date.now() - startedAt >= timeoutMs) {
+                    clearInterval(timer);
+                    reject(new Error('角色卡工具加载超时，请刷新后重试'));
+                }
+            }, 50);
+        });
 
         // Default Avatar (Simple Gray Background)
         const defaultAvatar = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2U1ZTdlYiIvPjwvc3ZnPg==';
@@ -149,12 +179,31 @@ createApp({
         const quotaError = ref(false);
         const quotaAvailable = ref(false);
 
+        const getImageGenConfig = () => {
+            try {
+                const adminSettings = JSON.parse(localStorage.getItem('rphub_admin_settings') || '{}');
+                return {
+                    url: adminSettings.imageGenApiUrl || '',
+                    token: adminSettings.imageGenApiKey || settings.imageGenKey || '',
+                    model: adminSettings.imageGenModel || 'nai-diffusion-4-5-full',
+                    steps: adminSettings.imageGenSteps || 40,
+                    scale: adminSettings.imageGenScale || 6,
+                    sampler: adminSettings.imageGenSampler || 'k_dpmpp_2m_sde',
+                    noiseSchedule: adminSettings.imageGenNoiseSchedule || 'karras',
+                    negative: adminSettings.imageGenNegative || ''
+                };
+            } catch (e) {
+                return { url: '', token: settings.imageGenKey || '', model: 'nai-diffusion-4-5-full', steps: 40, scale: 6, sampler: 'k_dpmpp_2m_sde', noiseSchedule: 'karras', negative: '' };
+            }
+        };
+
         const fetchQuota = async () => {
             quotaLoading.value = true;
             quotaError.value = false;
             try {
-                const imageGenToken = settings.imageGenKey || '';
-                const baseUrl = imageGenToken.trim().toUpperCase().startsWith('STA1N') ? 'https://nai.sta1n.cn' : 'https://std.loliyc.com';
+                const imgConfig = getImageGenConfig();
+                const imageGenToken = imgConfig.token;
+                const baseUrl = imgConfig.url || (imageGenToken.trim().toUpperCase().startsWith('STA1N') ? 'https://nai.sta1n.cn' : 'https://std.loliyc.com');
                 if (!imageGenToken) { quotaLoading.value = false; quotaError.value = true; return; }
                 const response = await fetch(`${baseUrl}/api/api/getUser`, {
                     method: 'POST',
@@ -773,9 +822,15 @@ createApp({
             { value: 'galgame', label: 'GalGame风' }
         ];
         const imageSizeOptions = [
-            { value: '竖图', label: '竖图' },
-            { value: '横图', label: '横图' },
-            { value: '方图', label: '方图' }
+            { value: '竖图', label: '竖图(-1)' },
+            { value: '横图', label: '横图(-1)' },
+            { value: '方图', label: '方图(-1)' },
+            { value: '2K竖图', label: '2K竖图(-8)' },
+            { value: '2K横图', label: '2K横图(-8)' },
+            { value: '2K方图', label: '2K方图(-8)' },
+            { value: '4K竖图', label: '4K竖图(-15)' },
+            { value: '4K横图', label: '4K横图(-15)' },
+            { value: '4K方图', label: '4K方图(-15)' }
         ];
         const uiTemplatePlacementOptions = [
             { value: 'top', label: '对话顶部' },
@@ -4023,8 +4078,9 @@ ${content}
                 const id = setTimeout(() => controller.abort(), 10000);
                 const startTime = performance.now();
 
-                const imageGenToken = settings.imageGenKey || '';
-                const baseUrl = imageGenToken.trim().toUpperCase().startsWith('STA1N') ? 'https://nai.sta1n.cn' : 'https://std.loliyc.com';
+                const imgConfig = getImageGenConfig();
+                const imageGenToken = imgConfig.token;
+                const baseUrl = imgConfig.url || (imageGenToken.trim().toUpperCase().startsWith('STA1N') ? 'https://nai.sta1n.cn' : 'https://std.loliyc.com');
 
                 await fetch(baseUrl, {
                     method: 'HEAD',
@@ -8950,9 +9006,18 @@ ${content}
         };
 
         const enforceSpecialRules = () => {
-            const imageGenToken = settings.imageGenKey || '';
-            const baseUrl = imageGenToken.trim().toUpperCase().startsWith('STA1N') ? 'https://nai.sta1n.cn' : 'https://std.loliyc.com';
+            const imgConfig = getImageGenConfig();
+            const imageGenToken = imgConfig.token;
+            const baseUrl = imgConfig.url || (imageGenToken.trim().toUpperCase().startsWith('STA1N') ? 'https://nai.sta1n.cn' : 'https://std.loliyc.com');
             if (!imageGenToken) return;
+
+            const imageGenModel = imgConfig.model;
+            const imageGenSteps = imgConfig.steps;
+            const imageGenScale = imgConfig.scale;
+            const imageGenSampler = imgConfig.sampler;
+            const imageGenNoiseSchedule = imgConfig.noiseSchedule;
+            const imageGenNegativeDefault = '{{{bad anatomy}}},{bad feet},bad hands,{{{bad proportions}}},{blurry},cloned face,cropped,{{{deformed}}},{{{disfigured}}},error,{{{extra arms}}},{extra digit},{{{extra legs}}},extra limbs,{{extra limbs}},{fewer digits},{{{fused fingers}}},gross proportions,ink eyes,ink hair,jpeg artifacts,{{{{long neck}}}},low quality,{malformed limbs},{{missing arms}},{missing fingers},{{missing legs}},{{{more than 2 nipples}}},mutated hands,{{{mutation}}},normal quality,owres,{{poorly drawn face}},{{poorly drawn hands}},reen eyes,signature,text,{{too many fingers}},{{{ugly}}},username,uta,watermark,worst quality,{{{more than 2 legs}}},awkward hand sign,weird hand gesture,contorted hand,unnatural finger pose,deformed hand gesture,{shaka},{hang loose},{{rock on}},{shaka sign}';
+            const imageGenNegative = imgConfig.negative || imageGenNegativeDefault;
 
             // 1. NAI画图正则 (统一版本)
             const imageGenRegexName = 'NAI画图正则';
@@ -8977,7 +9042,7 @@ ${content}
             const imageGenRegexContent = {
                 name: imageGenRegexName,
                 regex: '/image###([\\s\\S]*?)###/g',
-                replacement: '<div style="width: auto; height: auto; max-width: 100%; border: 8px solid transparent; background-image: linear-gradient(45deg, #FFC9D9, #CCE5FF); position: relative; border-radius: 16px; overflow: hidden; display: flex; justify-content: center; align-items: center; animation: gradientBG 3s ease infinite; box-shadow: 0 4px 15px rgba(204,229,255,0.3);"><div style="background: rgba(255,255,255,0.85); backdrop-filter: blur(5px); width: 100%; height: 100%; position: absolute; top: 0; left: 0;"></div><img src="' + baseUrl + '/generate?tag=$1&token=' + imageGenToken + '&model=nai-diffusion-4-5-full&artist=' + encodedTargetArtists + '&size=' + settings.imageSize + '&steps=40&scale=6&cfg=0&sampler=k_dpmpp_2m_sde&negative={{{{bad anatomy}}}},{bad feet},bad hands,{{{bad proportions}}},{blurry},cloned face,cropped,{{{deformed}}},{{{disfigured}}},error,{{{extra arms}}},{extra digit},{{{extra legs}}},extra limbs,{{extra limbs}},{fewer digits},{{{fused fingers}}},gross proportions,ink eyes,ink hair,jpeg artifacts,{{{{long neck}}}},low quality,{malformed limbs},{{missing arms}},{missing fingers},{{missing legs}},{{{more than 2 nipples}}},mutated hands,{{{mutation}}},normal quality,owres,{{poorly drawn face}},{{poorly drawn hands}},reen eyes,signature,text,{{too many fingers}},{{{ugly}}},username,uta,watermark,worst quality,{{{more than 2 legs}}},awkward hand sign,weird hand gesture,contorted hand,unnatural finger pose,deformed hand gesture,{shaka},{hang loose},{{rock on}},{shaka sign}&nocache=0&noise_schedule=karras"  alt="生成图片" style="max-width: 100%; height: auto; width: auto; display: block; object-fit: contain; transition: transform 0.3s ease; position: relative; z-index: 1;"></div><style>@keyframes gradientBG {0% {background-image: linear-gradient(45deg, #FFC9D9, #CCE5FF);}50% {background-image: linear-gradient(225deg, #FFC9D9, #CCE5FF);}100% {background-image: linear-gradient(45deg, #FFC9D9, #CCE5FF);}}</style>',
+                replacement: '<div style="width: auto; height: auto; max-width: 100%; border: 8px solid transparent; background-image: linear-gradient(45deg, #FFC9D9, #CCE5FF); position: relative; border-radius: 16px; overflow: hidden; display: flex; justify-content: center; align-items: center; animation: gradientBG 3s ease infinite; box-shadow: 0 4px 15px rgba(204,229,255,0.3);"><div style="background: rgba(255,255,255,0.85); backdrop-filter: blur(5px); width: 100%; height: 100%; position: absolute; top: 0; left: 0;"></div><img src="' + baseUrl + '/generate?tag=$1&token=' + imageGenToken + '&model=' + imageGenModel + '&artist=' + encodedTargetArtists + '&size=' + settings.imageSize + '&steps=' + imageGenSteps + '&scale=' + imageGenScale + '&cfg=0&sampler=' + imageGenSampler + '&negative=' + encodeURIComponent(imageGenNegative) + '&nocache=0&noise_schedule=' + imageGenNoiseSchedule + '"  alt="生成图片" style="max-width: 100%; height: auto; width: auto; display: block; object-fit: contain; transition: transform 0.3s ease; position: relative; z-index: 1;"></div><style>@keyframes gradientBG {0% {background-image: linear-gradient(45deg, #FFC9D9, #CCE5FF);}50% {background-image: linear-gradient(225deg, #FFC9D9, #CCE5FF);}100% {background-image: linear-gradient(45deg, #FFC9D9, #CCE5FF);}}</style>',
                 placement: [2],
                 markdownOnly: true,
                 promptOnly: false,
@@ -9391,7 +9456,7 @@ image###生成的提示词###
             // Reset file input
             event.target.value = '';
 
-            const processCharacterData = (rawData, avatarUrl) => {
+            const processCharacterData = async (rawData, avatarUrl) => {
                 try {
                     console.log('Processing Raw Data:', rawData);
                     let charData = rawData;
@@ -9595,7 +9660,8 @@ image###生成的提示词###
                     characters.value.push(char);
 
                     // Auto-select the new character
-                    selectCharacter(characters.value.length - 1, true);
+                    showAddCharacterMenu.value = false;
+                    await selectCharacter(characters.value.length - 1, true);
 
                 } catch (err) {
                     console.error("Character processing error:", err);
@@ -9605,10 +9671,10 @@ image###生成的提示词###
 
             if (file.type === 'application/json') {
                 const reader = new FileReader();
-                reader.onload = (e) => {
+                reader.onload = async (e) => {
                     try {
                         const data = JSON.parse(e.target.result);
-                        processCharacterData(data, null);
+                        await processCharacterData(data, null);
                     } catch (err) {
                         showToast('JSON解析失败: ' + err.message, 'error');
                     }
@@ -9619,7 +9685,8 @@ image###生成的提示词###
                 reader.onload = async (e) => {
                     try {
                         const buffer = e.target.result;
-                        const { data } = cardUtils.parsePngCharacterData(buffer);
+                        const utils = await waitForCardUtils();
+                        const { data } = utils.parsePngCharacterData(buffer);
                         const blob = new Blob([buffer], { type: 'image/png' });
                         const avatarUrl = await cardUtils.blobToDataUrl(blob);
                         processCharacterData(data, avatarUrl);

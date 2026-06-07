@@ -377,6 +377,59 @@
                                 </div>
                             </div>
                             
+                            <!-- Image Generation API -->
+                            <div class="bg-gray-800/60 backdrop-blur rounded-xl border border-gray-700 p-6">
+                                <h3 class="text-lg font-semibold text-white mb-4">生图 API 配置</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-300 mb-2">生图 API 地址</label>
+                                        <input type="text" id="imageGenApiUrl" placeholder="例: https://std.loliyc.com 或 https://nai.sta1n.cn"
+                                            class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <p class="mt-2 text-xs text-gray-500">生图服务的 API 基础地址</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-300 mb-2">生图 API Token</label>
+                                        <input type="password" id="imageGenApiKey" placeholder="生图服务的 Token / API Key"
+                                            class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <p class="mt-2 text-xs text-gray-500">STA1N 开头的 Token 将自动使用 nai.sta1n.cn 端点</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-300 mb-2">生图模型</label>
+                                        <input type="text" id="imageGenModel" placeholder="例: nai-diffusion-4-5-full"
+                                            class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-300 mb-2">采样步数</label>
+                                            <input type="number" id="imageGenSteps" placeholder="40" min="1" max="100"
+                                                class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-300 mb-2">CFG Scale</label>
+                                            <input type="number" id="imageGenScale" placeholder="6" min="1" max="30" step="0.5"
+                                                class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-300 mb-2">采样器</label>
+                                            <input type="text" id="imageGenSampler" placeholder="k_dpmpp_2m_sde"
+                                                class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-300 mb-2">噪声调度</label>
+                                            <input type="text" id="imageGenNoiseSchedule" placeholder="karras"
+                                                class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-300 mb-2">负面提示词</label>
+                                        <textarea id="imageGenNegative" rows="3" placeholder="bad anatomy, bad hands, bad proportions..."
+                                            class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <!-- Danger Zone -->
                             <div class="bg-gray-800/60 backdrop-blur rounded-xl border border-red-900/50 p-6">
                                 <h3 class="text-lg font-semibold text-red-400 mb-4">危险区域</h3>

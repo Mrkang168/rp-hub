@@ -113,7 +113,7 @@ const ArchiveManager = {
             throw new Error(error.message || `Upload failed: ${response.status}`);
         }
         
-        // Clean up old backups (keep only 9 most recent)
+        // Clean up old backups (keep only 5 most recent)
         await this.cleanupOldBackups();
         
         return true;
@@ -175,16 +175,16 @@ const ArchiveManager = {
         return true;
     },
     
-    // Clean up old backups (keep only 9 most recent)
+    // Clean up old backups (keep only 5 most recent)
     async cleanupOldBackups() {
         const backups = await this.listCloudBackups();
         
-        if (backups.length <= 9) {
+        if (backups.length <= 5) {
             return;
         }
         
-        // Get files to delete (older than 9 most recent)
-        const toDelete = backups.slice(9);
+        // Get files to delete (older than 5 most recent)
+        const toDelete = backups.slice(5);
         
         // Delete in parallel
         await Promise.all(
