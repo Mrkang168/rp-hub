@@ -626,6 +626,87 @@ const AdminApp = {
         }
     },
 
+    async fetchModels() {
+        const apiUrl = document.getElementById('apiUrl').value.trim();
+        const apiKey = document.getElementById('apiKey').value;
+        const statusEl = document.getElementById('fetchModelsStatus');
+        const btn = document.getElementById('fetchModelsBtn');
+
+        if (!apiUrl) {
+            this.showToast('请先填写 API URL', 'error');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = '获取中...';
+        statusEl.classList.remove('hidden');
+        statusEl.className = 'text-xs text-yellow-400 mt-1';
+        statusEl.textContent = '正在从 API 获取模型列表...';
+
+        try {
+            let modelsUrl = apiUrl.replace(/\/+$/, '');
+            if (!modelsUrl.endsWith('/models')) {
+                modelsUrl += '/models';
+            }
+
+            const headers = { 'Content-Type': 'application/json' };
+            if (apiKey) {
+                headers['Authorization'] = 'Bearer ' + apiKey;
+            }
+
+            const response = await fetch(modelsUrl, { headers, signal: AbortSignal.timeout(15000) });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            let models = [];
+
+            if (Array.isArray(data.data)) {
+                models = data.data.map(m => typeof m === 'string' ? m : (m.id || m.name || '')).filter(Boolean);
+            } else if (Array.isArray(data.models)) {
+                models = data.models.map(m => typeof m === 'string' ? m : (m.id || m.name || '')).filter(Boolean);
+            } else if (Array.isArray(data)) {
+                models = data.map(m => typeof m === 'string' ? m : (m.id || m.name || '')).filter(Boolean);
+            }
+
+            models.sort((a, b) => a.localeCompare(b));
+
+            if (models.length === 0) {
+                throw new Error('未找到模型，请检查 API URL 和 Key');
+            }
+
+            const selectIds = ['apiModel1', 'apiModel2', 'apiModel3', 'apiModelSuggest'];
+            selectIds.forEach(id => {
+                const select = document.getElementById(id);
+                const currentValue = select.value;
+                select.innerHTML = '<option value="">-- 选择模型 --</option>';
+                models.forEach(model => {
+                    const opt = document.createElement('option');
+                    opt.value = model;
+                    opt.textContent = model;
+                    select.appendChild(opt);
+                });
+                if (currentValue && models.includes(currentValue)) {
+                    select.value = currentValue;
+                }
+            });
+
+            statusEl.className = 'text-xs text-green-400 mt-1';
+            statusEl.textContent = `成功获取 ${models.length} 个模型`;
+            this.showToast(`已获取 ${models.length} 个模型`);
+
+        } catch (e) {
+            statusEl.className = 'text-xs text-red-400 mt-1';
+            statusEl.textContent = '获取失败: ' + e.message;
+            this.showToast('获取模型失败: ' + e.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> 从 API 获取模型列表';
+        }
+    },
+
     // Show add API modal
     showAddApiModal() {
         document.getElementById('apiModalTitle').textContent = '添加 API 配置';
@@ -1587,6 +1668,7 @@ window.closeApiModal = () => AdminApp.closeApiModal();
 window.saveApiConfig = () => AdminApp.saveApiConfig();
 window.refreshCloudBackupList = () => AdminApp.refreshCloudBackupList();
 window.switchApiType = (type) => AdminApp.switchApiType(type);
+window.fetchModels = () => AdminApp.fetchModels();
 
 // Expose for console debugging and tests
 window.AdminApp = AdminApp;

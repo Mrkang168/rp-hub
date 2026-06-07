@@ -532,6 +532,13 @@
                         <input type="password" id="apiKey" placeholder="sk-xxxxxxxxxxxxxxxxxxxx"
                             class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
+                    <div>
+                        <button onclick="fetchModels()" id="fetchModelsBtn" class="w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                            从 API 获取模型列表
+                        </button>
+                        <p id="fetchModelsStatus" class="text-xs text-gray-500 mt-1 hidden"></p>
+                    </div>
 
                     <!-- 文本模式字段 -->
                     <div id="textModeFields">
@@ -539,66 +546,25 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-300 mb-2">预设模型①</label>
                                 <select id="apiModel1" class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <option value="">-- 选择模型 --</option>
-                                    <option value="gemini-3.1-pro-preview-high">Gemini 3.1 Pro</option>
-                                    <option value="gemini-2.5-pro-preview-05-06">Gemini 2.5 Pro</option>
-                                    <option value="gemini-2.5-flash-preview-05-20">Gemini 2.5 Flash</option>
-                                    <option value="deepseek-r1-0528">DeepSeek R1</option>
-                                    <option value="deepseek-chat">DeepSeek V3</option>
-                                    <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
-                                    <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku</option>
-                                    <option value="gpt-4o">GPT-4o</option>
-                                    <option value="gpt-4o-mini">GPT-4o Mini</option>
-                                    <option value="qwen3-235b-a22b">Qwen3 235B</option>
-                                    <option value="qwen3-32b">Qwen3 32B</option>
+                                    <option value="">-- 先获取模型列表 --</option>
                                 </select>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-300 mb-2">预设模型②</label>
                                 <select id="apiModel2" class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <option value="">-- 选择模型 --</option>
-                                    <option value="gemini-3.1-pro-preview-high">Gemini 3.1 Pro</option>
-                                    <option value="gemini-2.5-pro-preview-05-06">Gemini 2.5 Pro</option>
-                                    <option value="gemini-2.5-flash-preview-05-20">Gemini 2.5 Flash</option>
-                                    <option value="deepseek-r1-0528">DeepSeek R1</option>
-                                    <option value="deepseek-chat">DeepSeek V3</option>
-                                    <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
-                                    <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku</option>
-                                    <option value="gpt-4o">GPT-4o</option>
-                                    <option value="gpt-4o-mini">GPT-4o Mini</option>
-                                    <option value="qwen3-235b-a22b">Qwen3 235B</option>
-                                    <option value="qwen3-32b">Qwen3 32B</option>
+                                    <option value="">-- 先获取模型列表 --</option>
                                 </select>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-300 mb-2">预设模型③</label>
                                 <select id="apiModel3" class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <option value="">-- 选择模型 --</option>
-                                    <option value="gemini-3.1-pro-preview-high">Gemini 3.1 Pro</option>
-                                    <option value="gemini-2.5-pro-preview-05-06">Gemini 2.5 Pro</option>
-                                    <option value="gemini-2.5-flash-preview-05-20">Gemini 2.5 Flash</option>
-                                    <option value="deepseek-r1-0528">DeepSeek R1</option>
-                                    <option value="deepseek-chat">DeepSeek V3</option>
-                                    <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
-                                    <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku</option>
-                                    <option value="gpt-4o">GPT-4o</option>
-                                    <option value="gpt-4o-mini">GPT-4o Mini</option>
-                                    <option value="qwen3-235b-a22b">Qwen3 235B</option>
-                                    <option value="qwen3-32b">Qwen3 32B</option>
+                                    <option value="">-- 先获取模型列表 --</option>
                                 </select>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-300 mb-2">建议回复模型</label>
                                 <select id="apiModelSuggest" class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <option value="">-- 选择模型 --</option>
-                                    <option value="gemini-2.5-flash-preview-05-20">Gemini 2.5 Flash</option>
-                                    <option value="gemini-3.1-pro-preview-high">Gemini 3.1 Pro</option>
-                                    <option value="gemini-2.5-pro-preview-05-06">Gemini 2.5 Pro</option>
-                                    <option value="deepseek-chat">DeepSeek V3</option>
-                                    <option value="deepseek-r1-0528">DeepSeek R1</option>
-                                    <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku</option>
-                                    <option value="gpt-4o-mini">GPT-4o Mini</option>
-                                    <option value="qwen3-32b">Qwen3 32B</option>
+                                    <option value="">-- 先获取模型列表 --</option>
                                 </select>
                             </div>
                         </div>
