@@ -643,26 +643,22 @@ const AdminApp = {
         statusEl.className = 'text-xs text-yellow-400 mt-1';
         statusEl.textContent = '正在从 API 获取模型列表...';
 
-        try {
-            let modelsUrl = apiUrl.replace(/\/+$/, '');
-            if (!modelsUrl.endsWith('/models')) {
-                modelsUrl += '/models';
-            }
+        let modelsUrl = apiUrl.replace(/\/+$/, '');
+        if (!modelsUrl.endsWith('/models')) {
+            modelsUrl += '/models';
+        }
 
-            const headers = { 'Content-Type': 'application/json' };
-            if (apiKey) {
-                headers['Authorization'] = 'Bearer ' + apiKey;
-            }
+        const headers = { 'Content-Type': 'application/json' };
+        if (apiKey) {
+            headers['Authorization'] = 'Bearer ' + apiKey;
+        }
 
-            const response = await fetch(modelsUrl, { headers, signal: AbortSignal.timeout(15000) });
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-
+        const tryFetch = async (url, label) => {
+            statusEl.textContent = `尝试${label}...`;
+            const response = await fetch(url, { headers, signal: AbortSignal.timeout(15000) });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json();
             let models = [];
-
             if (Array.isArray(data.data)) {
                 models = data.data.map(m => typeof m === 'string' ? m : (m.id || m.name || '')).filter(Boolean);
             } else if (Array.isArray(data.models)) {
@@ -670,28 +666,30 @@ const AdminApp = {
             } else if (Array.isArray(data)) {
                 models = data.map(m => typeof m === 'string' ? m : (m.id || m.name || '')).filter(Boolean);
             }
+            return models;
+        };
+
+        try {
+            let models = [];
+            try {
+                models = await tryFetch(modelsUrl, '直接请求');
+            } catch (e1) {
+                statusEl.textContent = '直接请求失败，尝试CORS代理...';
+                try {
+                    const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(modelsUrl);
+                    models = await tryFetch(proxyUrl, 'CORS代理');
+                } catch (e2) {
+                    throw new Error('直接请求和CORS代理均失败（可能是跨域限制）');
+                }
+            }
 
             models.sort((a, b) => a.localeCompare(b));
 
             if (models.length === 0) {
-                throw new Error('未找到模型，请检查 API URL 和 Key');
+                throw new Error('未找到模型');
             }
 
-            const selectIds = ['apiModel1', 'apiModel2', 'apiModel3', 'apiModelSuggest'];
-            selectIds.forEach(id => {
-                const select = document.getElementById(id);
-                const currentValue = select.value;
-                select.innerHTML = '<option value="">-- 选择模型 --</option>';
-                models.forEach(model => {
-                    const opt = document.createElement('option');
-                    opt.value = model;
-                    opt.textContent = model;
-                    select.appendChild(opt);
-                });
-                if (currentValue && models.includes(currentValue)) {
-                    select.value = currentValue;
-                }
-            });
+            this._populateModelSelects(models);
 
             statusEl.className = 'text-xs text-green-400 mt-1';
             statusEl.textContent = `成功获取 ${models.length} 个模型`;
@@ -700,11 +698,62 @@ const AdminApp = {
         } catch (e) {
             statusEl.className = 'text-xs text-red-400 mt-1';
             statusEl.textContent = '获取失败: ' + e.message;
-            this.showToast('获取模型失败: ' + e.message, 'error');
+            this._showManualModelInput();
         } finally {
             btn.disabled = false;
             btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> 从 API 获取模型列表';
         }
+    },
+
+    _populateModelSelects(models) {
+        const selectIds = ['apiModel1', 'apiModel2', 'apiModel3', 'apiModelSuggest'];
+        selectIds.forEach(id => {
+            const select = document.getElementById(id);
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">-- 选择模型 --</option>';
+            models.forEach(model => {
+                const opt = document.createElement('option');
+                opt.value = model;
+                opt.textContent = model;
+                select.appendChild(opt);
+            });
+            if (currentValue && models.includes(currentValue)) {
+                select.value = currentValue;
+            }
+        });
+    },
+
+    _showManualModelInput() {
+        this.showModal(
+            '手动输入模型列表',
+            `<p class="text-gray-300 mb-3">自动获取失败（可能是跨域限制），请手动粘贴模型列表。</p>
+             <p class="text-gray-400 text-sm mb-2">提示：在终端执行 <code class="bg-gray-700 px-1 rounded">curl -H "Authorization: Bearer YOUR_KEY" YOUR_API_URL/v1/models</code> 获取JSON，提取模型ID。</p>
+             <p class="text-gray-400 text-sm mb-3">每行一个模型ID，或粘贴JSON中的模型列表：</p>
+             <textarea id="manualModelsInput" rows="8" class="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y" placeholder="gemini-3.1-pro&#10;deepseek-v3&#10;gpt-4o"></textarea>`,
+            [
+                { text: '取消', type: 'secondary', onClick: () => this.closeModal() },
+                { text: '填入', type: 'primary', onClick: () => {
+                    const input = document.getElementById('manualModelsInput').value;
+                    let models = [];
+                    try {
+                        const parsed = JSON.parse(input);
+                        if (Array.isArray(parsed)) {
+                            models = parsed.map(m => typeof m === 'string' ? m : (m.id || m.name || '')).filter(Boolean);
+                        } else if (parsed.data && Array.isArray(parsed.data)) {
+                            models = parsed.data.map(m => typeof m === 'string' ? m : (m.id || m.name || '')).filter(Boolean);
+                        }
+                    } catch (_) {
+                        models = input.split('\n').map(l => l.trim()).filter(Boolean);
+                    }
+                    if (models.length > 0) {
+                        models.sort((a, b) => a.localeCompare(b));
+                        this._populateModelSelects(models);
+                        this.showToast(`已填入 ${models.length} 个模型`);
+                    }
+                    this.closeModal();
+                }}
+            ]
+        );
     },
 
     // Show add API modal
