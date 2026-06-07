@@ -706,9 +706,10 @@ const AdminApp = {
     },
 
     _populateModelSelects(models) {
-        const selectIds = ['apiModel1', 'apiModel2', 'apiModel3', 'apiModelSuggest'];
+        const selectIds = ['apiModel1', 'apiModel2', 'apiModel3', 'apiModelSuggest', 'apiImageModel'];
         selectIds.forEach(id => {
             const select = document.getElementById(id);
+            if (!select) return;
             const currentValue = select.value;
             select.innerHTML = '<option value="">-- 选择模型 --</option>';
             models.forEach(model => {
