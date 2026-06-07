@@ -874,15 +874,24 @@ const AdminApp = {
             document.getElementById('apiConfigCount').textContent = this.apiConfigs.length;
             this.closeApiModal();
             
-            if (this.settings.autoSyncEnabled && this.settings.githubToken) {
-                ArchiveManager.autoSync();
-            }
+            this._triggerCloudSync();
         } catch (e) {
             console.error('saveApiConfig error:', e);
             this.showToast('保存失败: ' + e.message, 'error');
         }
     },
     
+    async _triggerCloudSync() {
+        if (!this.settings.githubToken || !this.settings.githubOwner || !this.settings.githubRepo) return;
+        try {
+            const backupData = this.getCurrentBackupData();
+            await ArchiveManager.uploadBackup(backupData);
+            console.log('[sync] API配置已同步到云端存档');
+        } catch (e) {
+            console.warn('[sync] 云端同步失败:', e.message);
+        }
+    },
+
     // Delete API config
     deleteApiConfig(index) {
         this.showModal(
@@ -897,6 +906,7 @@ const AdminApp = {
                     document.getElementById('apiConfigCount').textContent = this.apiConfigs.length;
                     this.closeModal();
                     this.showToast('API 配置已删除');
+                    this._triggerCloudSync();
                 }}
             ]
         );
@@ -1005,6 +1015,7 @@ const AdminApp = {
                 console.error('[restore] apiConfigs 校验未通过, 跳过 apiConfigs 字段:', verification.error);
             } else {
                 localStorage.setItem('rphub_api_configs', JSON.stringify(verification.configs));
+                this.loadApiConfigs();
                 if (!verification.legacy) {
                     console.log('[restore] apiConfigs AES + MD5 校验通过 (' + verification.configs.length + ' 项)');
                 } else {
