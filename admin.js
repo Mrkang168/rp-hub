@@ -516,9 +516,19 @@ const AdminApp = {
             getReq.onsuccess = () => {
                 let settings = getReq.result || {};
                 settings.apiConfigs = this.apiConfigs;
+                const textConfig = this.apiConfigs.find(c => c.type === 'text' || !c.type);
+                if (textConfig) {
+                    const decryptedKey = this.decrypt(textConfig.apiKey);
+                    settings.apiUrl = textConfig.apiUrl || settings.apiUrl;
+                    settings.apiKey = decryptedKey || settings.apiKey;
+                    if (textConfig.model1) settings.model = textConfig.model1;
+                    if (textConfig.model2) settings.model2 = textConfig.model2;
+                    if (textConfig.model3) settings.model3 = textConfig.model3;
+                    if (textConfig.modelSuggest) settings.suggestModel = textConfig.modelSuggest;
+                }
                 store.put(settings, settingsKey);
             };
-            tx.oncomplete = () => { db.close(); };
+            tx.oncomplete = () => { db.close(); console.log('[sync] API配置已同步到主站IndexedDB'); };
             tx.onerror = () => { db.close(); };
         } catch (e) {
             console.warn('[sync] API配置同步到IndexedDB失败:', e.message);
