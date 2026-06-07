@@ -1,0 +1,20 @@
+{
+  "createdAt": 1780792404735,
+  "userId": "mrkang",
+  "data": {
+    "apiConfigs": {
+      "_encrypted": false,
+      "_algo": "none",
+      "_checksum": "d751713988987e9331980363e24189ce",
+      "_savedAt": 1780792404724,
+      "configs": []
+    },
+    "indexedDbData": {
+      "_source": "RPHubDB",
+      "_algo": "IDB-cursor+structuredClone",
+      "_savedAt": 1780792404735,
+      "_size": 0,
+      "entries": {}
+    }
+  }
+}
