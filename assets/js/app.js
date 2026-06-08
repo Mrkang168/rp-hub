@@ -17,6 +17,22 @@ createApp({
         CustomSelect: window.RPHubCustomSelect
     },
     setup() {
+        const needsCorsProxy = (url) => {
+            if (!url) return false;
+            try {
+                return location.protocol === 'https:' && new URL(url).protocol === 'http:';
+            } catch (_) { return false; }
+        };
+        const proxyFetch = (url, options = {}) => {
+            if (needsCorsProxy(url)) {
+                const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+                const pOpts = { ...options };
+                if (pOpts.headers) { const h = { ...pOpts.headers }; delete h['Authorization']; pOpts.headers = h; }
+                return fetch(proxyUrl, pOpts);
+            }
+            return fetch(url, options);
+        };
+
         const cardUtils = new Proxy({}, {
             get(_, key) {
                 const utils = window.RPHubCardUtils;
@@ -219,7 +235,7 @@ createApp({
                 const imageGenToken = imgConfig.token;
                 const baseUrl = imgConfig.url || (imageGenToken.trim().toUpperCase().startsWith('STA1N') ? 'https://nai.sta1n.cn' : 'https://std.loliyc.com');
                 if (!imageGenToken) { quotaLoading.value = false; quotaError.value = true; return; }
-                const response = await fetch(`${baseUrl}/api/api/getUser`, {
+                const response = await proxyFetch(`${baseUrl}/api/api/getUser`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ toUserId: imageGenToken })
@@ -2256,7 +2272,7 @@ createApp({
                 msgs.push({ role: 'user', content: prompt });
 
                 const url = settings.apiUrl.endsWith('/v1') ? `${settings.apiUrl}/chat/completions` : `${settings.apiUrl}/v1/chat/completions`;
-                const response = await fetch(url, {
+                const response = await proxyFetch(url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -4008,7 +4024,7 @@ ${content}
             try {
                 if (isManual) showToast('正在获取模型列表...', 'info');
                 const url = settings.apiUrl.endsWith('/v1') ? `${settings.apiUrl}/models` : `${settings.apiUrl}/v1/models`;
-                const response = await fetch(url, {
+                const response = await proxyFetch(url, {
                     headers: { 'Authorization': `Bearer ${settings.apiKey}` }
                 });
                 if (!response.ok) throw new Error('Failed to fetch models');
@@ -4066,7 +4082,7 @@ ${content}
                 const startTime = performance.now();
 
                 const url = settings.apiUrl.endsWith('/v1') ? `${settings.apiUrl}/models` : `${settings.apiUrl}/v1/models`;
-                const response = await fetch(url, {
+                const response = await proxyFetch(url, {
                     headers: { 'Authorization': `Bearer ${settings.apiKey}` },
                     signal: controller.signal
                 });
@@ -4096,7 +4112,7 @@ ${content}
                 const imageGenToken = imgConfig.token;
                 const baseUrl = imgConfig.url || (imageGenToken.trim().toUpperCase().startsWith('STA1N') ? 'https://nai.sta1n.cn' : 'https://std.loliyc.com');
 
-                await fetch(baseUrl, {
+                await proxyFetch(baseUrl, {
                     method: 'HEAD',
                     mode: 'no-cors',
                     signal: controller.signal
@@ -4547,7 +4563,7 @@ ${content}
                     const model = fallbackModel;
                     try {
                         const currentVariableJson = JSON.stringify(template.variableState || {}, null, 2);
-                        const response = await fetch(url, {
+                        const response = await proxyFetch(url, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -5744,7 +5760,7 @@ ${content}
 
             try {
                         const url = settings.apiUrl.endsWith('/v1') ? `${settings.apiUrl}/chat/completions` : `${settings.apiUrl}/v1/chat/completions`;
-                        const response = await fetch(url, {
+                        const response = await proxyFetch(url, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -6383,7 +6399,7 @@ ${content}
             const normalizedInputs = inputs.map(input => String(input || '').trim());
             if (normalizedInputs.some(input => !input)) throw new Error('嵌入内容不能为空');
 
-            const response = await fetch(getOpenAICompatUrl('embeddings'), {
+            const response = await proxyFetch(getOpenAICompatUrl('embeddings'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
