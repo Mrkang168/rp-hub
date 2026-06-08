@@ -2092,6 +2092,60 @@ createApp({
                     }
                     normalizeApiProviderSettings();
                 } else {
+                    // Migration: Load API configs from localStorage (used by admin.html) if IndexedDB is empty
+                    try {
+                        const localStorageApiConfigs = JSON.parse(localStorage.getItem('rphub_api_configs') || '[]');
+                        const localStorageAdminSettings = JSON.parse(localStorage.getItem('rphub_admin_settings') || '{}');
+                        
+                        if (localStorageApiConfigs.length > 0 || Object.keys(localStorageAdminSettings).length > 0) {
+                            // Migrate apiConfigs to IndexedDB settings
+                            const migratedSettings = {};
+                            
+                            // Migrate apiConfigs array
+                            if (localStorageApiConfigs.length > 0) {
+                                migratedSettings.apiConfigs = localStorageApiConfigs;
+                                
+                                // Extract text API config for legacy compatibility
+                                const textConfig = localStorageApiConfigs.find(c => c.type === 'text' || !c.type);
+                                if (textConfig) {
+                                    // Decrypt the key if it's encrypted
+                                    let decryptedKey = textConfig.apiKey || '';
+                                    if (textConfig._encryptedKey) {
+                                        try {
+                                            decryptedKey = decryptWithPassword(textConfig._encryptedKey, textConfig._passwordHint || '');
+                                        } catch (e) {
+                                            console.warn('Failed to decrypt API key, using as-is:', e);
+                                        }
+                                    }
+                                    migratedSettings.apiUrl = textConfig.apiUrl || '';
+                                    migratedSettings.apiKey = decryptedKey;
+                                    if (textConfig.model1) migratedSettings.model = textConfig.model1;
+                                    if (textConfig.model2) migratedSettings.model2 = textConfig.model2;
+                                    if (textConfig.model3) migratedSettings.model3 = textConfig.model3;
+                                    if (textConfig.modelSuggest) migratedSettings.suggestModel = textConfig.modelSuggest;
+                                }
+                            }
+                            
+                            // Migrate image gen settings from admin settings
+                            if (Object.keys(localStorageAdminSettings).length > 0) {
+                                if (localStorageAdminSettings.imageGenApiUrl) migratedSettings.imageGenApiUrl = localStorageAdminSettings.imageGenApiUrl;
+                                if (localStorageAdminSettings.imageGenApiKey) migratedSettings.imageGenApiKey = localStorageAdminSettings.imageGenApiKey;
+                                if (localStorageAdminSettings.imageGenModel) migratedSettings.imageGenModel = localStorageAdminSettings.imageGenModel;
+                                if (localStorageAdminSettings.imageGenSteps) migratedSettings.imageGenSteps = localStorageAdminSettings.imageGenSteps;
+                                if (localStorageAdminSettings.imageGenScale) migratedSettings.imageGenScale = localStorageAdminSettings.imageGenScale;
+                                if (localStorageAdminSettings.imageGenSampler) migratedSettings.imageGenSampler = localStorageAdminSettings.imageGenSampler;
+                                if (localStorageAdminSettings.imageGenNoiseSchedule) migratedSettings.imageGenNoiseSchedule = localStorageAdminSettings.imageGenNoiseSchedule;
+                                if (localStorageAdminSettings.imageGenNegative) migratedSettings.imageGenNegative = localStorageAdminSettings.imageGenNegative;
+                            }
+                            
+                            // Save migrated settings to IndexedDB
+                            await setStoredValue('settings', migratedSettings);
+                            Object.assign(settings, migratedSettings);
+                            console.log('Migrated API configs from localStorage to IndexedDB');
+                        }
+                    } catch (e) {
+                        console.warn('Failed to migrate API configs from localStorage:', e);
+                    }
                     normalizeApiProviderSettings();
                 }
                 delete settings.renderLayerLimit;
